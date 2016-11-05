@@ -9,7 +9,8 @@
 .actor	{position: absolute;}
 .player	{background: white;}
 .dead	{background: orange;}
-.coin	{background: red;}
+.coin	{background: yellow;}
+.enemy  {background: black}
 
 .game {
   overflow: hidden;
