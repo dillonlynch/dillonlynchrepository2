@@ -1,12 +1,13 @@
 // Map each class of actor to a character
 var deaths = 0;
-var fiveMinutes = 60 * 5,
+var fiveMinutes = 0 * 0,
         display = document.querySelector('#time');
     
 var actorChars = {
   "@": Player,
   "o": Coin, // A coin will wobble up and down
   "=": Lava, "|": Lava, "v": Lava  
+ 
 };
 
 function Level(plan) {
@@ -42,6 +43,10 @@ function Level(plan) {
       // Because there is a third case (space ' '), use an "else if" instead of "else"
       else if (ch == "!")
         fieldType = "lava";
+	else if (ch == "s")
+        fieldType = "spike";
+	else if (ch == "t")
+        fieldType = "turbo";
 
       // "Push" the fieldType, which is a string, onto the gridLine array (at the end).
       gridLine.push(fieldType);
@@ -79,7 +84,7 @@ Vector.prototype.times = function(factor) {
 // A Player has a size, speed and position.
 function Player(pos) {
   this.pos = pos.plus(new Vector(0, -0.5));
-  this.size = new Vector(0.8, 1.5);
+  this.size = new Vector(0.8, .7);
   this.speed = new Vector(0, 0);
 }
 Player.prototype.type = "player";
@@ -92,6 +97,8 @@ function Coin(pos) {
   this.wobble = Math.random() * Math.PI * 2;
 }
 Coin.prototype.type = "coin";
+
+
 
 // Lava is initialized based on the character, but otherwise has a
 // size and position
@@ -111,6 +118,20 @@ function Lava(pos, ch) {
   }
 }
 Lava.prototype.type = "lava";
+
+function Spike(pos, ch) {
+  this.pos = pos;
+  this.size = new Vector(1, 1);
+  
+}
+Spike.prototype.type = "spike";
+
+function Turbo(pos, ch) {
+  this.pos = pos;
+  this.size = new Vector(1, 1);
+  
+}
+Turbo.prototype.type = "turbo";
 
 // Helper function to easily create an element of a type provided 
 function elt(name, className) {
@@ -287,7 +308,6 @@ Lava.prototype.act = function(step, level) {
     this.speed = this.speed.times(-1);
 };
 
-
 var maxStep = 0.05;
 
 var wobbleSpeed = 8, wobbleDist = 0.07;
@@ -298,17 +318,6 @@ Coin.prototype.act = function(step) {
   this.pos = this.basePos.plus(new Vector(0, wobblePos));
 };
 
-var maxStep = 0.05;
-
-var wobbleSpeed = 8, wobbleDist = 0.07;
-
-Coin.prototype.act = function(step) {
-  this.wobble += step * wobbleSpeed;
-  var wobblePos = Math.sin(this.wobble) * wobbleDist;
-  this.pos = this.basePos.plus(new Vector(0, wobblePos));
-};
-
-var maxStep = 0.05;
 
 var playerXSpeed = 7;
 
@@ -330,7 +339,7 @@ Player.prototype.moveX = function(step, level, keys) {
     this.pos = newPos;
 };
 
-var gravity = 30;
+var gravity = 35;
 var jumpSpeed = 17;
 
 Player.prototype.moveY = function(step, level, keys) {
@@ -372,6 +381,11 @@ Level.prototype.playerTouched = function(type, actor) {
   // if the player touches lava and the player hasn't won
   // Player loses
   if (type == "lava" && this.status == null) {
+    this.status = "lost";
+    this.finishDelay = 1;
+	deaths++;
+	document.getElementById("message").innerHTML = "You Died: " + deaths + " Times";
+  }else if (type == "spike" && this.status == null) {
     this.status = "lost";
     this.finishDelay = 1;
 	deaths++;
@@ -483,9 +497,9 @@ function runGame(plans, Display) {
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
 
-        document.getElementById("time").innerHTML = "Remaining Time:" + minutes + ":" + seconds;
+        document.getElementById("time").innerHTML = "Time Played:" + minutes + ":" + seconds;
 
-        if (--timer < 0) {
+        if (++timer < 0) {
 			this.status = "lost";
             this.finishDelay = 1; 
         }
